@@ -8,15 +8,17 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 - List at least two concrete bugs you noticed at the start  
   (for example: "the hints were backwards").
 
+The first time I ran the game, it looked playable on the surface, but two things were immediately wrong: the "Too High"/"Too Low" hints told you to move the wrong direction (a "Too High" guess said "Go HIGHER!"), and the score sometimes went up instead of down for the same kind of wrong guess depending on which attempt number you were on.
+
 **Bug Reproduction Log**
 
 Document at least 3 bugs you found. Add rows as needed.
 
 | Input | Expected Behavior | Actual Behavior | Console Output / Error |
 |-------|-------------------|-----------------|------------------------|
-| | | | |
-| | | | |
-| | | | |
+| Secret is 50, guess 60 | "Too High" with a hint to go lower | Outcome "Too High" but message said "Go HIGHER!" | No error, just wrong hint text |
+| "Too High" outcome on attempt 2 vs. attempt 3 | Score always -5 for a wrong "Too High" guess | Score was +5 on even attempts, -5 on odd attempts | No error, inconsistent score in Developer Debug Info panel |
+| Guess on an even-numbered attempt (e.g. 2nd, 4th guess) | Guess compared correctly to the int secret | `app.py` converted secret to `str(secret)` every other attempt, so `check_guess` compared an int guess to a str secret | `TypeError` caught internally, masked by a try/except fallback |
 
 ---
 
