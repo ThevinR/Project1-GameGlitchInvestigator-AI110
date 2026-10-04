@@ -53,6 +53,8 @@ Yes — AI helped me design these tests. I described the bug in plain language (
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
 
+Every click reruns the whole script from top to bottom, so any plain variable resets each time. `st.session_state` is a dict that survives reruns, which is why `secret`, `score`, and `attempts` are stored there instead of as normal variables.
+
 ---
 
 ## 5. Looking ahead: your developer habits
@@ -61,3 +63,10 @@ Yes — AI helped me design these tests. I described the bug in plain language (
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+
+I want to keep writing a regression test for each bug before trusting that a fix actually worked, instead of just eyeballing the diff. Next time I'd ask the AI to run the tests itself right after each fix instead of waiting until the end, so broken tests (like the tuple-vs-string ones) surface immediately. This project made me more skeptical of AI-generated code by default — it runs and looks reasonable, but subtle logic bugs (inverted hints, parity-based scoring) only showed up once I actually played the game and wrote tests.
+
+
+### Reason why I did not accept the suggetions as written 
+
+ While fixing check_guess, the original function had a try/except TypeError fallback block that stringified the guess if comparing an int to a secret raised a TypeError (a symptom of a separate bug where app.py converted secret to a string on every other attempt). I had Claude fix that root cause too — removing the secret = str(...) conversion in app.py so check_guess always receives an int. Once that was done, the try/except TypeError fallback in check_guess became permanently dead code, since secret could never be a non-int anymore. Rather than leaving that unreachable branch in place "just in case," I had it rewrite check_guess without the fallback at all, keeping only the simple if/else comparison. I rejected keeping the defensive branch because it was now unreachable complexity that made the function harder to read for no benefit — not because the original suggestion was factually wrong. I confirmed this was safe by re-running the full test suite after the simplification (still 7/7 passing) and manually driving the Streamlit app in the browser across several guesses to confirm the hints and win condition still behaved correctly.
